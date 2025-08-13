@@ -21,7 +21,7 @@
 			padding: 12px;
 			width: 180px;
 		}
-		#knygos_forma {
+		#knygos_forma, #paieskos_forma {
 			margin: -60px auto 20px auto;
 			width: 60%;
 			padding: 25px;
@@ -60,12 +60,21 @@
 		$(document).ready ( function() {
 			
 			$( '#knygos_forma' ).hide();
+			$( '#paieskos_forma' ).hide();
 			
 			$( '#papildyti' ).click( function() {
 			
 				$( '#cite' ).hide();
+				$( '#paieskos_forma' ).hide();
 				$( '#knygos_forma' ).show();
 			});
+			
+			$( '#ieskoti' ).click( function() {
+			
+				$( '#cite' ).hide();
+				$( '#knygos_forma' ).hide();
+				$( '#paieskos_forma' ).show();
+			});			
 		});
 	</script>
 </head>
@@ -73,7 +82,7 @@
 	<img src="dusts/logotipas.webp" alt="Knygynėlis" id="logo">
 	<menu>
 		<button id="papildyti">Papildyti</button><br>
-		<button>Ieškoti</button>
+		<button id="ieskoti">Ieškoti</button>
 	</menu>
 	<section id="cite">
 		Skaitymas: maistas mintims desertas vaizduotei
@@ -96,6 +105,13 @@
 			<textarea name="ispudziai" id="ispudziai"></textarea>
 			<input type="hidden" name="id_knygos" value="0">			
 			<input type="submit" name="saugoti" value="Saugoti">
+		</form>
+	</section>
+	<section id="paieskos_forma">
+		<form method="POST">
+			<label>Ieškoma frazė</label>
+			<input type="text" name="paieskos_fraze" id="paieskos_fraze">
+			<input type="submit" name="ieskoti" value="Ieškoti">			
 		</form>
 	</section>
 </body>
