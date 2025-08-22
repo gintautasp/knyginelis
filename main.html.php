@@ -15,6 +15,7 @@
 			margin-right: 40px;
 			margin-top: -10px;
 			padding: 12px;
+			padding-bottom: 200px;
 		}
 		menu button {
 			margin-top: 12px;
@@ -57,6 +58,7 @@
 		#knygos {
 			margin: 25px auto 0 auto;
 			border-collapse: collapse;
+			width: 60%;
 		}
 		#knygos th, #knygos td {
 		
@@ -72,6 +74,18 @@
 		#knygos th {
 			background-color: rgb(198,134,67);
 		}
+		.knygos_tvarkymai {
+			width: auto;
+			padding: 1px 4px;
+			margin-bottom: 0;
+			margin-right: 7px;
+		}
+		.placiau {
+			display: none;
+		}
+		.veiksmai {
+			text-align: center;
+		}
 	</style>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script>
@@ -80,11 +94,17 @@
 			$( '#knygos_forma' ).hide();
 			$( '#paieskos_forma' ).hide();
 			
-			$( '#papildyti' ).click( function() {
-			
+			function ivedimo_rezimas() {
+
 				$( '#cite' ).hide();
 				$( '#paieskos_forma' ).hide();
 				$( '#knygos_forma' ).show();
+				$( '#knygu_sarasas' ).hide();
+			}
+			
+			$( '#papildyti' ).click( function() {
+			
+				ivedimo_rezimas();
 			});
 			
 			$( '#ieskoti' ).click( function() {
@@ -92,7 +112,75 @@
 				$( '#cite' ).hide();
 				$( '#knygos_forma' ).hide();
 				$( '#paieskos_forma' ).show();
-			});			
+			});
+			
+			$( '.parodyti' ).each( function() {
+			
+				$( this ).click( function() {
+				
+					id_knygos = $( this ).data ( 'id' );
+					$( '#antraste_apie_ka' + id_knygos ).show();
+					$( '#apie_ka' + id_knygos ).show();
+					$( '#antraste_kas_patiko' + id_knygos ).show();
+					$( '#kas_patiko' + id_knygos ).show();					
+				});
+			});
+			
+			$( '.slepti' ).each( function() {
+			
+				$( this ).click( function() {
+				
+					id_knygos = $( this ).data ( 'id' );
+					$( '#antraste_apie_ka' + id_knygos ).hide();
+					$( '#apie_ka' + id_knygos ).hide();
+					$( '#antraste_kas_patiko' + id_knygos ).hide();
+					$( '#kas_patiko' + id_knygos ).hide();					
+				});
+			});
+
+			$( '.redaguoti' ).each ( function() {
+
+				$( this ).click( function() {
+				
+					id_knygos = $( this ).data ( 'id' );
+					
+					$.get( 'knyga.php?id_knygos=' + id_knygos, function( json_knyga ) {
+					
+						knyga = JSON.parse ( json_knyga );
+						$( '#autoriai' ).val ( knyga.autoriai );
+						$( '#pav' ).val ( knyga.pav );
+						$( '#skaicius_psl' ).val ( knyga.skaicius_psl );
+						$( '#zanras' ).val ( knyga.zanras );
+						$( '#veikejai' ).val ( knyga.veikejai );
+						$( '#siuzetas' ).val ( knyga.siuzetas );
+						$( '#ispudziai' ).val ( knyga.ispudziai );
+						$( '#id_knygos' ).val ( knyga.id );
+						ivedimo_rezimas();
+					});
+				});
+			});
+			
+			$( '.salinti' ).each( function() {
+			
+				$( this ).click( function() {
+				
+					id_knygos = $( this ).data ( 'id' );	
+					
+					$.get( 'knyga.php?id_knygos=' + id_knygos, function( json_knyga ) {
+					
+						knyga = JSON.parse ( json_knyga );
+						klausimas = 'ar tikrai pašalinti šią knygą:\n\n' + knyga.autoriai + '\n' + knyga.pav +  '\n\n\t\t?';
+						
+						if ( confirm( klausimas ) == true ) {
+						
+							$(  '#id_salinamos_knygos' ).val ( knyga.id );
+							$(  '#veiksmas' ).val ( 'Salinti' );
+							
+							$( '#knygos_salinimo_forma' ).submit();
+						}
+					});
+				});
+			});
 		});
 	</script>
 </head>
@@ -121,12 +209,12 @@
 			<textarea name="siuzetas" id="siuzetas"></textarea>
 			<label>Kas patiko</label>
 			<textarea name="ispudziai" id="ispudziai"></textarea>
-			<input type="hidden" name="id_knygos" value="0">			
+			<input type="hidden" name="id_knygos" id="id_knygos" value="0">			
 			<input type="submit" name="saugoti" value="Saugoti">
 		</form>
 	</section>
 	<section id="paieskos_forma">
-		<form method="POST">
+		<form method="POST" action="">
 			<label>Ieškoma frazė</label>
 			<input type="text" name="paieskos_fraze" id="paieskos_fraze">
 			<input type="submit" name="ieskoti" value="Ieškoti">			
@@ -143,13 +231,38 @@
 			foreach ( $knygynelis -> knygos -> sarasas as $knyga ) {
 ?>	
 			<tr class="<?= $irasas ?>">
-				<td></td>
+				<td class="veiksmai">
+					<input type="button" value="&#9998;" class="knygos_tvarkymai redaguoti" data-id="<?= $knyga [ 'id' ] ?>">
+					<input type="button" value="&#9747;" class="knygos_tvarkymai salinti" data-id="<?= $knyga [ 'id' ] ?>">
+					<input type="button" value="&#9759;" class="knygos_tvarkymai parodyti" data-id="<?= $knyga [ 'id' ] ?>">
+					<input type="button" value="&#9757;" class="knygos_tvarkymai slepti" data-id="<?= $knyga [ 'id' ] ?>">
+				</td>
 				<td><?= $knyga [ 'autoriai' ] ?></td>
 				<td><?= $knyga [ 'pav' ] ?></td>
 				<td><?= $knyga [ 'skaicius_psl' ] ?></td>
 				<td><?= $knyga [ 'zanras' ] ?></td>
 				<td><?= $knyga [ 'veikejai' ] ?></td>				
 			</tr>
+			<tr class="placiau <?= $irasas ?>" id="antraste_apie_ka<?= $knyga [ 'id' ] ?>">
+				<th colspan="6">
+					Apie ką
+				</th>
+			</tr>
+			<tr class="placiau <?= $irasas ?>" id="apie_ka<?= $knyga [ 'id' ] ?>">
+				<td colspan="6">
+					<?= nl2br ( $knyga [ 'siuzetas' ] ) ?>
+				</td>
+			</tr>			
+			<tr class="placiau <?= $irasas ?>" id="antraste_kas_patiko<?= $knyga [ 'id' ] ?>">
+				<th colspan="6">
+					Kas patiko
+				</th>
+			</tr>
+			<tr class="placiau <?= $irasas ?>" id="kas_patiko<?= $knyga [ 'id' ] ?>">
+				<td colspan="6">
+					<?= $knyga [ 'ispudziai' ] ?>
+				</td>
+			</tr>			
 <?php			
 				if ( $irasas == 'nelyginis' ) {
 				
@@ -163,5 +276,9 @@
 ?>
 		</table>
 	</section>
+	<form id="knygos_salinimo_forma" method="POST" action="">
+		<input type="hidden" id="id_salinamos_knygos" name="id_salinamos_knygos" value="0">
+		<input type="hidden" id="veiksmas" name="veiksmas" value="nera">		
+	</form>
 </body>
 </html>

@@ -16,8 +16,7 @@
 
 	Knygynėli paimk knygų sąrašą
 */
-	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-	$mysqli = new mysqli ( 'localhost', 'root', '', 'grupe19' );
+	include 'config.php';
 
 	include 'Knyga.class.php';
 	include 'Knygos.class.php';	
